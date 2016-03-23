@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>锅打灰太狼</title>
+	<style type="text/css">
+	#wrap{
+		width: 320px;
+		height: 480px;
+		background: url(img/game_bg.jpg) no-repeat;
+		margin: 0 auto;
+		position: relative;
+	}
+	#score{
+		position: absolute;
+		top: 11px;
+		left: 60px;
+		font-size: 20px;
+		color: white;
+		font-family: arial;
+	}
+	#timeBar{
+		position: absolute;
+		top: 66px;
+		left: 63px;
+		background: url(img/progress.png) no-repeat;
+		width: 180px;
+		height: 16px;
+	}
+	#wolfBox div {
+		position: absolute;
+		width: 108px;
+		height: 101px;
+		/*background-image: url(img/x.png);*/
+		background-repeat: no-repeat;
+	}
+	#gameStart,#gameOver{
+		display: none;
+		font-family: "Microsoft Yahei";
+		color: #fd5f02;
+		font-size: 28px;
+		font-weight: bold;
+		text-shadow: 0 0 5px #FFFF00;
+		line-height: 50px;
+		width: 100%;
+		text-align: center;
+		position: absolute;
+		left: 0;
+	}
+	#gameStart a{
+		text-decoration: none;
+		color: #fd5f02;
+	}
+	#gameStart{
+		top: 170px;
+	}
+	#gameOver{
+		top: 220px;
+	}
+	</style>
+</head>
+<body>
+	<div id="wrap">
+		<div id="score">0</div>
+		<div id="timeBar"></div>
+		<div id="wolfBox"></div>
+		<div id="gameStart">
+			<a href="javascript:void(0)" id="start">开始</a> <br>
+			<a href="javascript:void(0)" id="state">游戏操作说明</a>
+		</div>
+		<div id="gameOver">gameover！</div>
+	</div>
+	<script type="text/javascript">
+	var score = document.getElementById("score");
+	var timeBar = document.getElementById("timeBar");
+	var gamestart = document.getElementById("gameStart");
+	var gameover = document.getElementById("gameOver");
+	var wolfBox = document.getElementById("wolfBox");
+	var holeArr = [{t:"116px",l:"99px"},{t:"161px",l:"18px"},{t:"143px",l:"187px"},
+		{t:"193px",l:"104px"},{t:"222px",l:"17px"},{t:"213px",l:"200px"},
+		{t:"275px",l:"119px"},{t:"295px",l:"30px"},{t:"297px",l:"208px"}];
+	var timer = 0;
+	var timer2 = 0;
+	var scoreGap = 0;
+	function rnd (min,max){
+		return parseInt(Math.random()*(max-min+1) + min)
+	}
+	function start(){
+		scoreGap = 0;
+		score.innerHTML = 0;
+		gameover.style.display = "none";
+		gamestart.style.display = "block";
+		var Start = document.getElementById("start");
+		Start.onclick = function(){
+			gamestart.style.display = "none";
+			timer = setInterval(createWolf,600);
+			timeBarMove();
+		}
+	}
+	start();
+ 	var arr=[];
+
+	function createWolf(){
+		var wolf = document.createElement("div");
+		var rand = rnd(0,8);
+		while(arr.indexOf(rand) > -1){
+			rand = rnd(0,8);
+		}
+		arr.push(rand);
+		if(arr.length == 3){
+			arr.splice(0,2);
+		}
+		console.log(arr);
+		var hole = holeArr[rand];
+		var who = Math.random()>0.8 ? "x" : "h" ;
+		wolf.style.backgroundImage = "url(img/"+who+".png)";
+		wolf.style.top = hole.t;
+		wolf.style.left = hole.l;
+		wolfBox.appendChild(wolf);
+		wolf.index = 0;
+		wolf.flag = true;
+		wolf.ifClick = false;
+		wolf.onclick = function() {
+			wolf.onclick = null;
+			wolf.ifClick = true;
+			wolf.index = 5;
+			if(who == "x"){
+				scoreGap -= 10;
+				score.innerHTML = scoreGap;
+			}else if(who == "h"){
+				scoreGap += 10;
+				score.innerHTML = scoreGap;
+			}
+		}
+		wolf.ownTimer = setInterval(function() {
+			if(wolf.flag || wolf.ifClick) {
+				wolf.index++;
+			}else {
+				wolf.index--;
+			}
+			
+			if(wolf.index >= 5) {
+				// clearInterval(wolf.ownTimer);
+				wolf.flag = false;
+			}
+			if(wolf.index < 0 || wolf.index > 9) {
+				 clearInterval(wolf.ownTimer);
+				 wolf.parentNode.removeChild(wolf);
+			}
+			wolf.style.backgroundPosition = - wolf.index * 108 +"px 0";
+		},100)
+	}
+	function timeBarMove(){	
+		var a=0;
+		timer2 = setInterval(function (){
+			a++;
+			timeBar.style.width = 180-a + "px";
+			if(a>=180){
+				clearInterval(timer);
+				clearInterval(timer2);	
+				gameover.style.display="block";
+				setTimeout(start,3000);
+			}
+		},100) 
+	}
+	</script>
+</body>
+</html>
